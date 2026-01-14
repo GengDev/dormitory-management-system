@@ -1,0 +1,628 @@
+// Prisma Schema for Dormitory Management System
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// User Management
+// ============================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  passwordHash String @default("")
+  fullName  String
+  phone     String?
+  role      Role     @default(tenant)
+  isActive  Boolean  @default(true)
+  lastLoginAt DateTime?
+
+  // Soft delete
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenants   Tenant[]
+  guestChats ChatRoom[] @relation("GuestChat")
+  adminChats ChatRoom[] @relation("AdminChat")
+  messages   ChatMessage[]
+  bills      Bill[]
+  assignedMaintenance MaintenanceRequest[] @relation("AssignedMaintenance")
+  recordedUtilities    RoomUtility[]        @relation("UtilityRecorder")
+  verifiedPayments     Payment[]            @relation("PaymentVerifier")
+
+  lineUserId String? @unique
+  lineUser   LineUser? @relation("UserLine")
+
+  // Indexes
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+
+  @@map("users")
+}
+
+enum Role {
+  admin
+  tenant
+  guest
+}
+
+// ============================================
+// Building & Room Management
+// ============================================
+
+model Building {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  description String?
+  totalFloors Int      @default(1)
+  amenities   String[] // JSON array of amenities
+  images      String[] // JSON array of image URLs
+
+  // Soft delete
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  rooms Room[]
+
+  @@map("buildings")
+}
+
+model Room {
+  id             String            @id @default(uuid())
+  roomNumber     String
+  floorNumber    Int
+  roomType       RoomType
+  monthlyRent    Float
+  deposit        Float             @default(0)
+  areaSqm        Float?
+  maxOccupancy   Int               @default(1)
+  description    String?
+  amenities      String[]          // JSON array of amenities
+  status         RoomStatus        @default(available)
+  images         String[]          // JSON array of image URLs
+
+  // Soft delete
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  buildingId String
+  building   Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+
+  tenants    Tenant[]
+  bills      Bill[]
+  maintenance MaintenanceRequest[]
+  chatRooms   ChatRoom[]
+  utilities   RoomUtility[]
+
+  @@unique([buildingId, roomNumber])
+  @@index([buildingId])
+  @@index([status])
+  @@index([roomType])
+  @@map("rooms")
+}
+
+enum RoomType {
+  single
+  double
+  suite
+  studio
+}
+
+enum RoomStatus {
+  available
+  occupied
+  maintenance
+}
+
+// ============================================
+// Tenant Management
+// ============================================
+
+model Tenant {
+  id             String   @id @default(uuid())
+  fullName       String
+  email          String   @unique
+  phone          String
+  idCardNumber   String   @unique
+  dateOfBirth    DateTime?
+  occupation     String?
+  emergencyContact String?
+  emergencyContactPhone String?
+  contractStartDate DateTime?
+  contractEndDate   DateTime?
+  moveInDate     DateTime?
+  moveOutDate    DateTime?
+  status         TenantStatus @default(active)
+
+  // Soft delete
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id])
+
+  roomId    String?
+  room      Room?     @relation(fields: [roomId], references: [id])
+
+  lineUserId String?  @unique
+  lineUser   LineUser? @relation("TenantLine", fields: [lineUserId], references: [id])
+
+  bills     Bill[]
+  payments  Payment[]
+  maintenance MaintenanceRequest[]
+  chatRooms ChatRoom[]
+  notifications Notification[]
+  utilities   RoomUtility[]
+
+  // Indexes
+  @@index([email])
+  @@index([phone])
+  @@index([status])
+  @@index([roomId])
+  @@index([lineUserId])
+
+  @@map("tenants")
+}
+
+enum TenantStatus {
+  active
+  inactive
+  moved_out
+}
+
+// ============================================
+// Billing System
+// ============================================
+
+model Bill {
+  id            String     @id @default(uuid())
+  billNumber    String     @unique @default(uuid())
+  billingMonth  DateTime   @default(now()) // Updated from Int
+  dueDate       DateTime
+  status        BillStatus @default(pending)
+  subtotal      Float      @default(0)
+  tax           Float      @default(0)
+  totalAmount   Float      @default(0)
+  notes         String?
+  paymentDate   DateTime?
+  paidAmount    Float      @default(0)
+  paidAt        DateTime?
+  
+  // Flat fields for simple usage (optional but kept for compatibility)
+  rentAmount    Float      @default(0)
+  waterUsage    Float      @default(0)
+  waterRate     Float      @default(15)
+  waterAmount   Float      @default(0)
+  electricityUsage Float   @default(0)
+  electricityRate Float    @default(8)
+  electricityAmount Float  @default(0)
+
+  // Soft delete
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  roomId   String
+  room     Room   @relation(fields: [roomId], references: [id])
+
+  items    BillItem[]
+  payments Payment[]
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+
+  // Optional link to utility reading
+  utilityId String?
+  utility   RoomUtility? @relation(fields: [utilityId], references: [id])
+
+  @@index([billingMonth])
+  @@index([dueDate])
+  @@map("bills")
+}
+
+model BillItem {
+  id          String   @id @default(uuid())
+  itemType    String   // rent, utility, other
+  description String
+  quantity    Float    @default(1)
+  unitPrice   Float
+  amount      Float
+  metadata    Json     @default("{}")
+  
+  billId      String
+  bill        Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("bill_items")
+}
+
+enum BillStatus {
+  pending
+  verifying
+  paid
+  overdue
+  cancelled
+}
+
+// ============================================
+// Payment System
+// ============================================
+
+model Payment {
+  id            String         @id @default(uuid())
+  amount        Float
+  paymentMethod PaymentMethod
+  paymentDate   DateTime
+  referenceNumber String?
+  notes         String?
+
+  // Approval system
+  status        PaymentStatus  @default(pending)
+  receiptUrl    String?
+  approvedAt    DateTime?
+  approvedBy    String?
+  verifier      User?          @relation("PaymentVerifier", fields: [approvedBy], references: [id])
+
+  // Soft delete
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  billId   String
+  bill     Bill   @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  // Indexes
+  @@index([billId])
+  @@index([tenantId])
+  @@index([status])
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  cash
+  bank_transfer
+  promptpay
+  credit_card
+}
+
+enum PaymentStatus {
+  pending
+  approved
+  rejected
+}
+
+// ============================================
+// Maintenance System
+// ============================================
+
+model MaintenanceRequest {
+  id            String              @id @default(uuid())
+  title         String
+  description   String
+  category      MaintenanceCategory
+  priority      Priority            @default(medium)
+  status        MaintenanceStatus   @default(pending)
+
+  // Cost estimation and actual cost
+  estimatedCost Float?
+  actualCost    Float?
+
+  // Scheduling
+  scheduledDate DateTime?
+  completedDate DateTime?
+
+  // Additional info
+  images        String[]            // JSON array of image URLs
+  notes         String?
+
+  // Soft delete
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  roomId   String
+  room     Room   @relation(fields: [roomId], references: [id])
+
+  assignedById String?
+  assignedBy   User?   @relation("AssignedMaintenance", fields: [assignedById], references: [id])
+  
+  assignedTo   String?   // Technician name or external vendor
+
+
+  // Indexes
+  @@index([tenantId])
+  @@index([roomId])
+  @@index([status])
+  @@index([priority])
+
+  @@map("maintenance_requests")
+}
+
+enum MaintenanceCategory {
+  electrical
+  plumbing
+  structural
+  appliance
+  cleaning
+  other
+}
+
+enum Priority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum MaintenanceStatus {
+  pending
+  in_progress
+  completed
+  cancelled
+}
+
+// ============================================
+// Chat System
+// ============================================
+
+model ChatMessage {
+  id        String      @id @default(uuid())
+  content   String
+  timestamp DateTime    @default(now())
+  isAdmin   Boolean     @default(false) 
+  
+  // Message Status
+  isRead    Boolean     @default(false)
+  readAt    DateTime?
+  deletedAt DateTime?
+  
+  // Content Type
+  messageType MessageType @default(text)
+  fileUrl     String?
+
+  // Relations
+  senderId  String?
+  sender    User?       @relation(fields: [senderId], references: [id])
+  // We can't strictly enforce foreign key if sender is anonymous (system/socket id), 
+  // but for now let's assume sender is always a User or we handle it gracefully. 
+  // Wait, existing code uses senderName. 
+  // Let's keep senderName for flexibility? 
+  // The plan said "sender: Relation to User". 
+  // If we look at existing schema: senderId String, senderName String. 
+  // Let's keep senderName/senderId but add relation to User as optional?
+  // Actually, let's follow the existing schema structure but add missing fields.
+  senderName String?
+  
+  // Room-based chat
+  chatRoomId String
+  chatRoom   ChatRoom   @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  // Indexes
+  @@index([chatRoomId])
+  @@index([timestamp])
+  @@index([senderId])
+
+  @@map("chat_messages")
+}
+
+enum MessageType {
+  text
+  image
+  file
+  system
+}
+
+model ChatRoom {
+  id        String        @id @default(uuid())
+  name      String?       // Optional name for group chats
+  isPublic  Boolean       @default(false)
+  
+  // Session info for anonymous chats
+  sessionId String?       @unique
+  guestName String?
+  
+  isActive  Boolean       @default(true)
+  lastMessageAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // Relations
+  messages  ChatMessage[]
+
+  // Room context (optional - for inquiries specific to a room)
+  roomId    String?
+  room      Room?         @relation(fields: [roomId], references: [id])
+
+  // Participants
+  tenantId  String?
+  tenant    Tenant?       @relation(fields: [tenantId], references: [id])
+  
+  guestUserId String?
+  guest       User?     @relation("GuestChat", fields: [guestUserId], references: [id])
+  
+  adminUserId String?
+  admin       User?     @relation("AdminChat", fields: [adminUserId], references: [id])
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("chat_rooms")
+  @@index([tenantId])
+  @@index([guestUserId])
+  @@index([adminUserId])
+  @@index([sessionId])
+  @@index([lastMessageAt])
+}
+
+// ============================================
+// LINE Integration
+// ============================================
+
+model LineUser {
+  id        String   @id @default(uuid())
+  lineUserId String  @unique
+  displayName String?
+  pictureUrl String?
+
+  // Relations
+  tenant   Tenant?  @relation("TenantLine")
+  
+  userId   String?  @unique
+  user     User?    @relation("UserLine", fields: [userId], references: [id])
+
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("line_users")
+}
+
+model LineEvent {
+  id        String     @id @default(uuid())
+  lineUserId String
+  eventType String
+  eventData Json       // Raw LINE event data
+  processed Boolean    @default(false)
+
+  createdAt DateTime   @default(now())
+
+  // Indexes
+  @@index([lineUserId])
+  @@index([processed])
+  @@index([createdAt])
+
+  @@map("line_events")
+}
+
+model Notification {
+  id               String           @id @default(uuid())
+  notificationType NotificationType
+  title            String
+  message          String
+  data             Json?            // Additional data
+
+  // Delivery status
+  sentAt    DateTime?
+  readAt    DateTime?
+
+  // Relations
+  tenantId  String
+  tenant    Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // LINE delivery
+  lineUserId String?
+  lineUser   LineUser?      @relation(fields: [lineUserId], references: [id])
+
+  status           NotificationStatus @default(pending)
+  createdAt DateTime        @default(now())
+
+  // Indexes
+  @@index([tenantId])
+  @@index([notificationType])
+  @@index([readAt])
+  @@index([status])
+
+  @@map("notifications")
+}
+
+enum NotificationStatus {
+  pending
+  sent
+  failed
+  read
+}
+
+enum NotificationType {
+  bill_created
+  bill_due
+  bill_overdue
+  payment_submitted
+  payment_approved
+  payment_rejected
+  maintenance_updated
+  maintenance_completed
+  general
+}
+
+// ============================================
+// Utility Management (Meter Readings)
+// ============================================
+
+model RoomUtility {
+  id                         String   @id @default(uuid())
+  recordMonth                DateTime // The month this reading is for
+  
+  // Water readings
+  waterPreviousReading       Float?
+  waterCurrentReading        Float?
+  waterUsage                 Float?
+  waterRate                  Float
+  waterCost                  Float
+  
+  // Electricity readings
+  electricityPreviousReading Float?
+  electricityCurrentReading  Float?
+  electricityUsage           Float?
+  electricityRate            Float
+  electricityCost            Float
+  
+  notes                      String?
+  
+  // Metadata
+  deletedAt                  DateTime?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  // Relations
+  roomId                     String
+  room                       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  
+  tenantId                   String?
+  tenant                     Tenant?  @relation(fields: [tenantId], references: [id])
+  
+  recordedById               String?
+  recordedBy                 User?    @relation("UtilityRecorder", fields: [recordedById], references: [id])
+
+  bills                      Bill[]
+
+  @@index([roomId])
+  @@index([tenantId])
+  @@index([recordMonth])
+  @@map("room_utilities")
+}
+
+// ============================================
+// Schema Complete ✅
+// ============================================

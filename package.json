@@ -1,0 +1,47 @@
+{
+  "name": "dormitory-management-system",
+  "version": "1.0.0",
+  "description": "ระบบจองหอพักและจัดการผู้เช่า พร้อม LINE Integration",
+  "author": "",
+  "private": true,
+  "license": "MIT",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "install:all": "npm install && npm run install:backend && npm run install:frontend",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:frontend": "cd frontend && npm run lint",
+    "format": "npm run format:backend && npm run format:frontend",
+    "format:backend": "cd backend && npx prettier --write \"src/**/*.ts\"",
+    "format:frontend": "cd frontend && npx prettier --write \"**/*.{ts,tsx}\"",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "prisma:generate": "cd backend && npm run prisma:generate",
+    "prisma:migrate": "cd backend && npm run prisma:migrate",
+    "prisma:migrate:deploy": "cd backend && npm run prisma:migrate:deploy",
+    "prisma:migrate:reset": "cd backend && npm run prisma:migrate:reset",
+    "prisma:studio": "cd backend && npm run prisma:studio",
+    "prisma:seed": "cd backend && npm run prisma:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0"
+  }
+}

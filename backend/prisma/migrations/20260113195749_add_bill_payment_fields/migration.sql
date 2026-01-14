@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "bills" ADD COLUMN     "paidAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "paidAt" TIMESTAMP(3);
