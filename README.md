@@ -7,7 +7,6 @@
 [![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
 ---
 
@@ -62,7 +61,6 @@ A production-ready dormitory management system built to streamline operations fo
 - ⚡ **Real-time Updates** - Socket.io for instant notifications and chat
 - 🤖 **Automated Workflows** - Cron jobs for bill generation and reminders
 - 📧 **Multi-channel Notifications** - LINE, in-app, and email notifications
-- 🐳 **Containerized Deployment** - Docker Compose for easy deployment
 - 🧪 **Comprehensive Testing** - 60%+ test coverage with unit and integration tests
 - 📱 **Mobile Responsive** - Optimized for all devices
 
@@ -93,8 +91,6 @@ A production-ready dormitory management system built to streamline operations fo
 - **Logging:** Winston
 
 ### DevOps & Tools
-- **Containerization:** Docker & Docker Compose
-- **Reverse Proxy:** Nginx
 - **Testing:** Jest, Supertest
 - **Linting:** ESLint, Prettier
 - **Version Control:** Git
@@ -163,27 +159,50 @@ A production-ready dormitory management system built to streamline operations fo
 - Node.js 18+
 - PostgreSQL 14+
 - Redis 6+
-- Docker & Docker Compose (optional)
 
-### Quick Start with Docker
+### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/dormitory.git
-cd dormitory
+git clone https://github.com/yourusername/dormitory-management-system.git
+cd dormitory-management-system
+
+# Install dependencies
+npm install
+cd backend && npm install
+cd ../frontend && npm install
+cd ..
 
 # Setup environment
 cp env.example .env
 # Edit .env with your configuration
+```
 
-# Start all services
-docker-compose up -d
+### Database Setup
+
+```bash
+cd backend
+
+# Generate Prisma client
+npm run prisma:generate
 
 # Run migrations
-docker-compose exec backend npm run prisma:migrate:deploy
+npm run prisma:migrate:deploy
 
 # Seed database (optional)
-docker-compose exec backend npm run prisma:seed
+npm run prisma:seed
+```
+
+### Running the Application
+
+```bash
+# Terminal 1: Start backend
+cd backend
+npm run dev
+
+# Terminal 2: Start frontend
+cd frontend
+npm run dev
 ```
 
 **Access Points:**
@@ -191,9 +210,7 @@ docker-compose exec backend npm run prisma:seed
 - Backend API: http://localhost:3001
 - Prisma Studio: `npm run prisma:studio`
 
-### Manual Setup
-
-See [Deployment Guide](./docs/DEPLOYMENT.md) for detailed instructions.
+For detailed setup instructions, see [Deployment Guide](./docs/DEPLOYMENT.md).
 
 ---
 
@@ -226,9 +243,9 @@ See [Deployment Guide](./docs/DEPLOYMENT.md) for detailed instructions.
    - Comprehensive API documentation
 
 5. **DevOps & Deployment**
-   - Docker containerization
-   - Nginx reverse proxy
-   - SSL/TLS configuration
+   - Production-ready deployment guides
+   - Cloud platform integration (Railway, Vercel)
+   - Environment configuration
    - Database backup strategies
 
 ---
@@ -269,20 +286,23 @@ Comprehensive documentation available:
 
 ## 🚢 Deployment
 
-### Docker Deployment (Recommended)
+### Recommended: Railway + Vercel
 
-```bash
-# Production deployment
-docker-compose -f docker-compose.prod.yml up -d
-```
+**Backend & Database:** Deploy to [Railway](https://railway.app)  
+**Frontend:** Deploy to [Vercel](https://vercel.com)
 
-### Manual Deployment
+See [Railway + Vercel Deployment Guide](./docs/DEPLOY_RAILWAY_VERCEL.md) for step-by-step instructions.
+
+### Alternative Options
+
+- **Render** - All-in-one platform
+- **Fly.io** - Global edge deployment
+- **DigitalOcean** - VPS deployment
 
 See [Deployment Guide](./docs/DEPLOYMENT.md) for:
 - SSL certificate setup
 - Database configuration
 - Environment variables
-- Nginx configuration
 - Backup strategies
 
 ---
@@ -307,11 +327,11 @@ See [Deployment Guide](./docs/DEPLOYMENT.md) for:
 - Responsive design with Tailwind CSS
 
 **DevOps & Infrastructure:**
-- Docker containerization and orchestration
-- Nginx reverse proxy configuration
+- Cloud platform deployment (Railway, Vercel)
 - Database migration strategies
 - Monitoring and health checks
 - Security best practices
+- Environment configuration management
 
 **Software Engineering:**
 - Test-driven development
@@ -326,7 +346,7 @@ See [Deployment Guide](./docs/DEPLOYMENT.md) for:
 2. **Complex Billing Logic** - Designed flexible billing system with utility meter tracking
 3. **LINE Integration** - Worked with webhook events and Flex Messages
 4. **Payment Verification** - Built multi-step approval workflow with file uploads
-5. **Production Deployment** - Configured Docker, Nginx, and SSL for production
+5. **Cloud Deployment** - Configured Railway and Vercel for production deployment
 
 ---
 
