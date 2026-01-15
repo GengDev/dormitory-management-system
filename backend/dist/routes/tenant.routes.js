@@ -59,5 +59,11 @@ router.delete('/:id', auth_middleware_1.authenticate, (0, auth_middleware_1.auth
  * @body    { lineUserId }
  */
 router.post('/:id/link-line', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['admin']), [(0, express_validator_1.body)('lineUserId').trim().notEmpty().withMessage('LINE User ID is required')], validate_middleware_1.validateRequest, tenant_controller_1.linkLineUser);
+/**
+ * @route   PATCH /api/tenants/:id/reset-password
+ * @desc    Reset tenant password (Admin only)
+ * @access  Private (Admin only)
+ */
+router.patch('/:id/reset-password', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['admin']), tenant_controller_1.resetTenantPassword);
 exports.default = router;
 //# sourceMappingURL=tenant.routes.js.map

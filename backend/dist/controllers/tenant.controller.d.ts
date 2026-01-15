@@ -66,4 +66,14 @@ export declare const deleteTenant: (req: import("express").Request, res: Respons
  * @param res - Express response
  */
 export declare const linkLineUser: (req: import("express").Request, res: Response, next: import("express").NextFunction) => void;
+/**
+ * Reset Tenant Password
+ *
+ * @route   PATCH /api/tenants/:id/reset-password
+ * @access  Private (Admin only)
+ *
+ * @param req - Express request (params: id)
+ * @param res - Express response
+ */
+export declare const resetTenantPassword: (req: import("express").Request, res: Response, next: import("express").NextFunction) => void;
 //# sourceMappingURL=tenant.controller.d.ts.map

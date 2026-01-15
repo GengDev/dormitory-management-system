@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
  * Health Check Endpoint
  * GET /api/health
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (_req: Request, res: Response) => {
     const health = {
         status: 'ok',
         timestamp: new Date().toISOString(),
@@ -53,7 +53,7 @@ router.get('/', async (req: Request, res: Response) => {
  * Readiness Check
  * GET /api/health/ready
  */
-router.get('/ready', async (req: Request, res: Response) => {
+router.get('/ready', async (_req: Request, res: Response) => {
     try {
         // Check if database is ready
         await prisma.$queryRaw`SELECT 1`;
@@ -75,7 +75,7 @@ router.get('/ready', async (req: Request, res: Response) => {
  * Liveness Check
  * GET /api/health/live
  */
-router.get('/live', (req: Request, res: Response) => {
+router.get('/live', (_req: Request, res: Response) => {
     res.status(200).json({
         status: 'alive',
         timestamp: new Date().toISOString(),
@@ -87,7 +87,7 @@ router.get('/live', (req: Request, res: Response) => {
  * Metrics Endpoint
  * GET /api/health/metrics
  */
-router.get('/metrics', (req: Request, res: Response) => {
+router.get('/metrics', (_req: Request, res: Response) => {
     const metrics = {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),

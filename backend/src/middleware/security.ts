@@ -25,7 +25,7 @@ export function addCsrfToken(req: Request, res: Response, next: NextFunction) {
  * Request Size Limit Middleware
  */
 export function requestSizeLimit(maxSize: string = '10mb') {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
         const contentLength = req.get('content-length');
 
         if (contentLength) {
@@ -33,7 +33,7 @@ export function requestSizeLimit(maxSize: string = '10mb') {
             const maxSizeInMB = parseInt(maxSize);
 
             if (sizeInMB > maxSizeInMB) {
-                return res.status(413).json({
+                return _res.status(413).json({
                     success: false,
                     error: {
                         code: 'PAYLOAD_TOO_LARGE',
@@ -52,11 +52,11 @@ export function requestSizeLimit(maxSize: string = '10mb') {
  * IP Whitelist Middleware
  */
 export function ipWhitelist(allowedIPs: string[]) {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
         const clientIP = req.ip || req.connection.remoteAddress;
 
         if (!clientIP || !allowedIPs.includes(clientIP)) {
-            return res.status(403).json({
+            return _res.status(403).json({
                 success: false,
                 error: {
                     code: 'IP_NOT_ALLOWED',
@@ -106,7 +106,7 @@ export function userRateLimit(maxRequests: number = 100, windowMs: number = 9000
 /**
  * API Key Validation Middleware
  */
-export function validateApiKey(req: Request, res: Response, next: NextFunction) {
+export function validateApiKey(req: Request, _res: Response, next: NextFunction) {
     const apiKey = req.get('X-API-Key');
     const validApiKey = process.env.API_KEY;
 
@@ -131,7 +131,7 @@ export function validateApiKey(req: Request, res: Response, next: NextFunction) 
 /**
  * Secure Headers Middleware (additional to helmet)
  */
-export function secureHeaders(req: Request, res: Response, next: NextFunction) {
+export function secureHeaders(_req: Request, res: Response, next: NextFunction) {
     // Prevent clickjacking
     res.setHeader('X-Frame-Options', 'DENY');
 
@@ -153,7 +153,7 @@ export function secureHeaders(req: Request, res: Response, next: NextFunction) {
 /**
  * Content Security Policy
  */
-export function contentSecurityPolicy(req: Request, res: Response, next: NextFunction) {
+export function contentSecurityPolicy(_req: Request, res: Response, next: NextFunction) {
     const csp = [
         "default-src 'self'",
         "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -171,7 +171,7 @@ export function contentSecurityPolicy(req: Request, res: Response, next: NextFun
 /**
  * Prevent Parameter Pollution
  */
-export function preventParameterPollution(req: Request, res: Response, next: NextFunction) {
+export function preventParameterPollution(req: Request, _res: Response, next: NextFunction) {
     // Convert array parameters to single values (take first value)
     for (const key in req.query) {
         if (Array.isArray(req.query[key])) {

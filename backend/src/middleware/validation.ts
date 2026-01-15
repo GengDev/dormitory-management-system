@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { validationResult, ValidationChain } from 'express-validator';
+import { validationResult } from 'express-validator';
 import { ValidationError } from '../utils/errors';
 
 /**
  * Validation Middleware
  * Checks for validation errors from express-validator
  */
-export function validate(req: Request, res: Response, next: NextFunction) {
+export function validate(req: Request, _res: Response, next: NextFunction) {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -47,7 +47,7 @@ export function sanitizeInput(input: any): any {
 /**
  * Sanitize Request Body Middleware
  */
-export function sanitizeBody(req: Request, res: Response, next: NextFunction) {
+export function sanitizeBody(req: Request, _res: Response, next: NextFunction) {
     if (req.body) {
         req.body = sanitizeInput(req.body);
     }
@@ -57,7 +57,7 @@ export function sanitizeBody(req: Request, res: Response, next: NextFunction) {
 /**
  * Sanitize Query Parameters Middleware
  */
-export function sanitizeQuery(req: Request, res: Response, next: NextFunction) {
+export function sanitizeQuery(req: Request, _res: Response, next: NextFunction) {
     if (req.query) {
         req.query = sanitizeInput(req.query);
     }
@@ -67,7 +67,7 @@ export function sanitizeQuery(req: Request, res: Response, next: NextFunction) {
 /**
  * Sanitize All Inputs Middleware
  */
-export function sanitizeAll(req: Request, res: Response, next: NextFunction) {
+export function sanitizeAll(req: Request, _res: Response, next: NextFunction) {
     if (req.body) {
         req.body = sanitizeInput(req.body);
     }

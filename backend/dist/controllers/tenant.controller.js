@@ -6,11 +6,44 @@
  *
  * @module server/src/controllers/tenant.controller
  */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.linkLineUser = exports.deleteTenant = exports.updateTenant = exports.createTenant = exports.getTenantById = exports.getTenants = void 0;
+exports.resetTenantPassword = exports.linkLineUser = exports.deleteTenant = exports.updateTenant = exports.createTenant = exports.getTenantById = exports.getTenants = void 0;
 const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const errorHandler_1 = require("../middleware/errorHandler");
@@ -628,6 +661,83 @@ exports.linkLineUser = (0, errorHandler_1.asyncHandler)(async (req, res) => {
         success: true,
         message: 'LINE user linked successfully',
         data: { tenant: updatedTenant },
+    });
+});
+/**
+ * Reset Tenant Password
+ *
+ * @route   PATCH /api/tenants/:id/reset-password
+ * @access  Private (Admin only)
+ *
+ * @param req - Express request (params: id)
+ * @param res - Express response
+ */
+exports.resetTenantPassword = (0, errorHandler_1.asyncHandler)(async (req, res) => {
+    const { id } = req.params;
+    logger_1.logger.info(`Password reset requested for tenant: ${id}`, {
+        requestedBy: req.user?.userId,
+    });
+    // 1. Get tenant with user info
+    const tenant = await prisma.tenant.findUnique({
+        where: { id, deletedAt: null },
+        include: {
+            user: true,
+            lineUser: true
+        },
+    });
+    if (!tenant) {
+        logger_1.logger.warn(`Tenant not found for password reset: ${id}`);
+        res.status(404).json({
+            success: false,
+            message: 'Tenant not found',
+        });
+        return;
+    }
+    if (!tenant.user) {
+        logger_1.logger.warn(`User account not found for tenant: ${id}`);
+        res.status(404).json({
+            success: false,
+            message: 'User account not found for this tenant',
+        });
+        return;
+    }
+    // 2. Generate new password (use phone number)
+    const newPassword = tenant.phone;
+    const hashedPassword = await bcrypt_1.default.hash(newPassword, 10);
+    // 3. Update user password
+    await prisma.user.update({
+        where: { id: tenant.user.id },
+        data: { passwordHash: hashedPassword },
+    });
+    logger_1.logger.info(`Password reset successful for tenant: ${tenant.fullName}`, {
+        tenantId: id,
+        resetBy: req.user?.userId,
+    });
+    // 4. Send LINE notification if available
+    if (tenant.lineUser) {
+        try {
+            const { notificationQueue } = await Promise.resolve().then(() => __importStar(require('../jobs/queue')));
+            await notificationQueue.add('send-notification', {
+                tenantId: tenant.id,
+                type: 'general',
+                title: '🔑 รีเซ็ตรหัสผ่าน',
+                message: `รหัสผ่านของคุณถูกรีเซ็ตแล้ว\n\nรหัสผ่านใหม่: ${newPassword}\n\nกรุณาเข้าสู่ระบบและเปลี่ยนรหัสผ่านใหม่เพื่อความปลอดภัย`,
+            });
+            logger_1.logger.info(`LINE notification sent for password reset: ${tenant.fullName}`);
+        }
+        catch (error) {
+            logger_1.logger.error('Failed to send LINE notification for password reset', { error });
+            // Don't fail the request if notification fails
+        }
+    }
+    res.json({
+        success: true,
+        message: 'Password reset successfully',
+        data: {
+            tenantName: tenant.fullName,
+            newPassword, // Return to admin so they can inform the tenant
+            notificationSent: !!tenant.lineUser,
+        },
     });
 });
 //# sourceMappingURL=tenant.controller.js.map
