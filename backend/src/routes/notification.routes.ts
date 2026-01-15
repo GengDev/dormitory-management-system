@@ -18,7 +18,7 @@ import {
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route   GET /api/notifications

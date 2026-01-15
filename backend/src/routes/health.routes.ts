@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import Redis from 'ioredis';
 
-const router = Router();
+const router: Router = Router();
 const prisma = new PrismaClient();
 
 /**

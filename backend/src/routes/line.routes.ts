@@ -12,7 +12,7 @@ import { handleWebhook, verifySignature, sendMessage, sendFlexMessage, getUnlink
 import { authenticate, authorize } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route   POST /api/line/webhook

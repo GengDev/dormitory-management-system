@@ -19,7 +19,7 @@ import {
 import { authenticate, authorize, optionalAuth } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route   GET /api/rooms

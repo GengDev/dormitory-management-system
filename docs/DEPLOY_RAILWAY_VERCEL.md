@@ -83,12 +83,12 @@ In Railway backend service settings:
 
 **Build Command:**
 ```bash
-npm install && npx prisma generate && npm run build
+npm install && npm run prisma:generate && npm run build
 ```
 
 **Start Command:**
 ```bash
-npx prisma migrate deploy && npm start
+npm run prisma:migrate:deploy && npm start
 ```
 
 ### Step 6: Deploy

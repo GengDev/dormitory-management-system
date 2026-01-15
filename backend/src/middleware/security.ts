@@ -33,7 +33,7 @@ export function requestSizeLimit(maxSize: string = '10mb') {
             const maxSizeInMB = parseInt(maxSize);
 
             if (sizeInMB > maxSizeInMB) {
-                return _res.status(413).json({
+                _res.status(413).json({
                     success: false,
                     error: {
                         code: 'PAYLOAD_TOO_LARGE',
@@ -41,6 +41,7 @@ export function requestSizeLimit(maxSize: string = '10mb') {
                         statusCode: 413,
                     },
                 });
+                return;
             }
         }
 
@@ -56,7 +57,7 @@ export function ipWhitelist(allowedIPs: string[]) {
         const clientIP = req.ip || req.connection.remoteAddress;
 
         if (!clientIP || !allowedIPs.includes(clientIP)) {
-            return _res.status(403).json({
+            _res.status(403).json({
                 success: false,
                 error: {
                     code: 'IP_NOT_ALLOWED',
@@ -64,6 +65,7 @@ export function ipWhitelist(allowedIPs: string[]) {
                     statusCode: 403,
                 },
             });
+            return;
         }
 
         next();
@@ -76,7 +78,7 @@ export function ipWhitelist(allowedIPs: string[]) {
 const userRateLimits = new Map<string, { count: number; resetTime: number }>();
 
 export function userRateLimit(maxRequests: number = 100, windowMs: number = 900000) {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
         const userId = (req as any).user?.userId;
 
         if (!userId) {
@@ -115,7 +117,7 @@ export function validateApiKey(req: Request, _res: Response, next: NextFunction)
     }
 
     if (!apiKey || apiKey !== validApiKey) {
-        return res.status(401).json({
+        _res.status(401).json({
             success: false,
             error: {
                 code: 'INVALID_API_KEY',
@@ -123,6 +125,7 @@ export function validateApiKey(req: Request, _res: Response, next: NextFunction)
                 statusCode: 401,
             },
         });
+        return;
     }
 
     next();

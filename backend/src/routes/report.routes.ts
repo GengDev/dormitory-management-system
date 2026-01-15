@@ -21,7 +21,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 
 const prisma = new PrismaClient();
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route   GET /api/reports

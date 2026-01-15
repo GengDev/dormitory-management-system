@@ -6,7 +6,7 @@ import { authenticate } from '../middleware/auth.middleware';
 import { logger } from '../utils/logger';
 import { StorageService } from '../services/storage.service';
 
-const router = Router();
+const router: Router = Router();
 
 // Configure storage
 const storage = multer.diskStorage({

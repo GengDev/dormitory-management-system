@@ -17,7 +17,7 @@ import {
 import { authenticate } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validate.middleware';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route   GET /api/chat/rooms

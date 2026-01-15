@@ -8,7 +8,7 @@
  * @author Dormitory Management System
  */
 
-import express from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -47,7 +47,7 @@ import path from 'path';
 /**
  * Initialize Express Application
  */
-const app = express();
+const app: Application = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 3000;
 

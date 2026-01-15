@@ -17,7 +17,7 @@ import {
 } from '../controllers/user.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * @route   GET /api/users
