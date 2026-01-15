@@ -4176,3 +4176,30 @@
 {"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-15 03:44:57"}
 {"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-15 03:44:57"}
 {"level":"info","message":"SIGINT signal received: closing HTTP server","service":"dormitory-api","timestamp":"2026-01-15 04:03:35"}
+{"level":"info","message":"Socket.io initialized","service":"dormitory-api","timestamp":"2026-01-16 02:42:20"}
+{"level":"info","message":"Bull queues initialized","service":"dormitory-api","timestamp":"2026-01-16 02:42:20"}
+{"level":"info","message":"Cron jobs initialized","service":"dormitory-api","timestamp":"2026-01-16 02:42:20"}
+{"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-16 02:42:20"}
+{"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-16 02:42:20"}
+{"level":"info","message":"SIGINT signal received: closing HTTP server","service":"dormitory-api","timestamp":"2026-01-16 02:50:39"}
+{"level":"info","message":"Socket.io initialized","service":"dormitory-api","timestamp":"2026-01-16 02:50:41"}
+{"level":"info","message":"Bull queues initialized","service":"dormitory-api","timestamp":"2026-01-16 02:50:41"}
+{"level":"info","message":"Cron jobs initialized","service":"dormitory-api","timestamp":"2026-01-16 02:50:41"}
+{"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-16 02:50:41"}
+{"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-16 02:50:41"}
+{"level":"info","message":"SIGINT signal received: closing HTTP server","service":"dormitory-api","timestamp":"2026-01-16 02:51:50"}
+{"level":"info","message":"Socket.io initialized","service":"dormitory-api","timestamp":"2026-01-16 02:51:54"}
+{"level":"info","message":"Bull queues initialized","service":"dormitory-api","timestamp":"2026-01-16 02:51:54"}
+{"level":"info","message":"Cron jobs initialized","service":"dormitory-api","timestamp":"2026-01-16 02:51:54"}
+{"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-16 02:51:54"}
+{"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-16 02:51:54"}
+{"level":"info","message":"SIGINT signal received: closing HTTP server","service":"dormitory-api","timestamp":"2026-01-16 02:52:52"}
+{"level":"info","message":"Socket.io initialized","service":"dormitory-api","timestamp":"2026-01-16 02:52:54"}
+{"level":"info","message":"Bull queues initialized","service":"dormitory-api","timestamp":"2026-01-16 02:52:54"}
+{"level":"info","message":"Cron jobs initialized","service":"dormitory-api","timestamp":"2026-01-16 02:52:54"}
+{"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-16 02:52:54"}
+{"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-16 02:52:54"}
+{"ip":"::1","level":"info","message":"GET /api/public/buildings","service":"dormitory-api","timestamp":"2026-01-16 02:53:04","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"info","message":"GET /api/public/buildings","service":"dormitory-api","timestamp":"2026-01-16 02:53:06","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"info","message":"GET /api/public/rooms","service":"dormitory-api","timestamp":"2026-01-16 02:53:06","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"}
+{"ip":"::1","level":"info","message":"GET /api/public/rooms","service":"dormitory-api","timestamp":"2026-01-16 02:53:07","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"}
