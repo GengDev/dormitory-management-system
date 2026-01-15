@@ -15,7 +15,7 @@ class ApiClient {
   private failedQueue: any[] = [];
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     this.client = axios.create({
       baseURL: this.baseURL,
@@ -158,7 +158,7 @@ class ApiClient {
   // Auth methods
   async login(credentials: { email: string; password: string }) {
     console.log('API login called with:', credentials);
-    console.log('Backend URL:', process.env.NEXT_PUBLIC_BACKEND_URL);
+    console.log('Backend URL:', process.env.NEXT_PUBLIC_API_URL);
     try {
       const response = await this.post('/api/auth/login', credentials);
       console.log('Login response:', response);

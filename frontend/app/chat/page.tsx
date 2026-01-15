@@ -53,7 +53,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!showNameModal && userName) {
       // Initialize socket connection to public chat namespace
-      const newSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/public-chat`, {
+      const newSocket = io(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/public-chat`, {
         transports: ['websocket', 'polling'],
       });
 
