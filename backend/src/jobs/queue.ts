@@ -14,19 +14,21 @@ import { processBillGenerationJob } from './processors/billGeneration.processor'
 /**
  * Redis Configuration
  */
-const redisConfig = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
-  password: process.env.REDIS_PASSWORD,
-};
+const redisConfig = process.env.REDIS_URL
+  ? process.env.REDIS_URL
+  : {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    password: process.env.REDIS_PASSWORD,
+  };
 
 /**
  * Notification Queue
  * 
  * สำหรับส่ง LINE notifications
  */
-export const notificationQueue = new Bull('notifications', {
-  redis: redisConfig,
+export const notificationQueue = new Bull('notifications', process.env.REDIS_URL || {
+  redis: redisConfig as any,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -43,8 +45,8 @@ export const notificationQueue = new Bull('notifications', {
  * 
  * สำหรับสร้างบิลรายเดือน
  */
-export const billGenerationQueue = new Bull('bill-generation', {
-  redis: redisConfig,
+export const billGenerationQueue = new Bull('bill-generation', process.env.REDIS_URL || {
+  redis: redisConfig as any,
   settings: {
     maxStalledCount: 1,
   },

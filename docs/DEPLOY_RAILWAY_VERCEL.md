@@ -269,18 +269,19 @@ curl https://your-backend-url.railway.app/api/health
 ```
 
 ### Database connection issues
+**Error P1001: Can't reach database server** (Supabase + Railway)
 
-**Check:**
-1. `DATABASE_URL` is correct
-2. Database is running
-3. Migrations completed
+**Cause:** Railway may have trouble connecting to Supabase's `db.*` domain due to network restrictions or IPv6 issues.
 
 **Solution:**
-```bash
-# Check database status in Railway
-# Restart database if needed
-# Re-run migrations
-```
+Use the **Supabase Connection Pooler** host but with **Port 5432** (Session Mode) for the `DIRECT_URL`.
+1. Check your `DATABASE_URL` (pooler host): `...aws-0-ap-northeast-2.pooler.supabase.com...`
+2. Update `DIRECT_URL` to use that SAME host, but keep port **5432**.
+   - **Bad:** `db.xxxx.supabase.co` (Direct host sometimes fails)
+   - **Good:** `aws-0-ap-northeast-2.pooler.supabase.com` (Pooler host) + Port `5432`
+
+Example:
+`postgresql://postgres.user:pass@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres`
 
 ---
 
