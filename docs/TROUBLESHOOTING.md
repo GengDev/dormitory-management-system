@@ -1,481 +1,191 @@
-# 🔧 Troubleshooting Guide
+# 🔧 คู่มือการแก้ปัญหาเบื้องต้น (Troubleshooting Guide)
 
-## Common Issues and Solutions
+## ปัญหาที่พบบ่อยและวิธีแก้ไข
 
-### Database Issues
+### ปัญหา Database
 
-#### Cannot connect to database
+#### เชื่อมต่อ Database ไม่ได้
 
-**Symptoms:**
+**อาการ:**
 - Error: `Can't reach database server`
-- Application fails to start
+- แอปพลิเคชันเริ่มทำงานไม่ได้ (Start ไม่ติด)
 
-**Solutions:**
+**วิธีแก้ไข:**
 
-1. Check if PostgreSQL is running:
-```bash
-# Docker
-docker-compose ps postgres
+1. **เช็คว่า PostgreSQL ทำงานอยู่ไหม:**
+   ```bash
+   # ถ้าใช้ Docker
+   docker-compose ps postgres
+   
+   # ถ้ารันในเครื่อง (Local)
+   sudo systemctl status postgresql
+   ```
 
-# Local
-sudo systemctl status postgresql
-```
+2. **ตรวจสอบค่า `DATABASE_URL` ในไฟล์ `.env`:**
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/dormitory"
+   ```
 
-2. Verify DATABASE_URL in `.env`:
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/dormitory"
-```
+3. **ทดสอบการเชื่อมต่อ:**
+   ```bash
+   # ใช้ psql
+   psql -h localhost -U postgres -d dormitory
+   ```
 
-3. Test connection:
-```bash
-# Using psql
-psql -h localhost -U postgres -d dormitory
+4. **สำหรับ Railway (สำคัญ!):**
+   - ตรวจสอบว่ามีตัวแปร `DIRECT_URL` หรือยัง? (จำเป็นสำหรับ Supabase)
+   - `DIRECT_URL` ต้องใช้ Port **5432** (Session Mode)
+   - `DATABASE_URL` ใช้ Port **6543** (Pooler Mode)
 
-# Using Docker
-docker-compose exec postgres psql -U postgres -d dormitory
-```
+#### Migration ไม่ผ่าน
 
-4. Check firewall settings:
-```bash
-sudo ufw status
-sudo ufw allow 5432/tcp
-```
-
-#### Migration errors
-
-**Symptoms:**
+**อาการ:**
 - Error: `Migration failed`
-- Schema out of sync
+- โครงสร้าง Database ไม่ตรงกับโค้ด
 
-**Solutions:**
+**วิธีแก้ไข:**
 
-1. Reset database (development only):
-```bash
-npm run prisma:migrate:reset
-```
+1. **Reset Database ใหม่ (เฉพาะเครื่อง Local เท่านั้น! ห้ามทำบน Production):**
+   ```bash
+   npm run prisma:migrate:reset
+   ```
 
-2. Generate Prisma client:
-```bash
-npm run prisma:generate
-```
+2. **สร้าง Prisma Client ใหม่:**
+   ```bash
+   npm run prisma:generate
+   ```
 
-3. Deploy migrations:
-```bash
-npm run prisma:migrate:deploy
-```
-
-4. Check migration status:
-```bash
-npx prisma migrate status
-```
+3. **รัน Migration (บน Production):**
+   ```bash
+   npm run prisma:migrate:deploy
+   ```
 
 ---
 
-### Redis Issues
+### ปัญหา Redis
 
-#### Redis connection timeout
+#### Redis Connection Timeout
 
-**Symptoms:**
+**อาการ:**
 - Error: `Redis connection timeout`
-- Slow application performance
+- แอปพลิเคชันทำงานช้า หรือค้างไปเลย
+- Railway Restart บ่อยๆ
 
-**Solutions:**
+**วิธีแก้ไข:**
 
-1. Check if Redis is running:
-```bash
-docker-compose ps redis
-redis-cli ping
-```
+1. **เช็คว่า Redis ทำงานอยู่ไหม:**
+   ```bash
+   docker-compose ps redis
+   ```
 
-2. Verify REDIS_URL in `.env`:
-```env
-REDIS_URL="redis://localhost:6379"
-```
+2. **ตรวจสอบ `REDIS_URL` ใน `.env`:**
+   - **Local:** `redis://localhost:6379`
+   - **Railway:** ต้องใช้ URL ของจริงจาก Service Redis (ไม่ใช่ localhost)
 
-3. Clear Redis cache:
-```bash
-redis-cli FLUSHALL
-```
-
-4. Restart Redis:
-```bash
-docker-compose restart redis
-```
+3. **ทดสอบโค้ดเชื่อมต่อ:**
+   - ตรวจสอบว่าโค้ดรองรับการใช้ `REDIS_URL` แบบเต็ม (ซึ่งตอนนี้แก้ให้แล้วใน `queue.ts`)
 
 ---
 
-### Authentication Issues
+### ปัญหาการเข้าสู่ระบบ (Authentication)
 
-#### JWT token invalid
+#### JWT Token ไม่ถูกต้อง (Invalid Token)
 
-**Symptoms:**
+**อาการ:**
 - Error: `Invalid token`
-- Users logged out unexpectedly
+- ผู้ใช้งานหลุดออกจากระบบบ่อยๆ
 
-**Solutions:**
+**วิธีแก้ไข:**
 
-1. Check JWT_SECRET in `.env`:
-```env
-JWT_SECRET="your-secret-key-at-least-32-characters"
-```
+1. **ตรวจสอบ `JWT_SECRET`:**
+   - ต้องตั้งค่านี้ใน `.env` ทั้ง Local และ Production
+   - ควรมีความยาวอย่างน้อย 32 ตัวอักษร
 
-2. Clear browser cookies and localStorage
+2. **ลองเคลียร์ Browser Cache:**
+   - ลบ Cookies และ LocalStorage แล้วลอง Login ใหม่
 
-3. Verify token expiration settings:
-```env
-JWT_EXPIRES_IN="1h"
-JWT_REFRESH_EXPIRES_IN="7d"
-```
+#### Login ไม่ได้ (Authentication Failed)
 
-#### Cannot login
+**อาการ:**
+- ใส่รหัสถูกแต่เข้าระบบไม่ได้
 
-**Symptoms:**
-- Login fails with correct credentials
-- Error: `Authentication failed`
+**วิธีแก้ไข:**
 
-**Solutions:**
+1. **เช็คว่ามี User ใน Database ไหม:**
+   ```sql
+   SELECT * FROM users WHERE email = 'user@example.com';
+   ```
 
-1. Check user exists in database:
-```sql
-SELECT * FROM users WHERE email = 'user@example.com';
-```
-
-2. Reset password:
-```bash
-# Using Prisma Studio
-npm run prisma:studio
-```
-
-3. Check password hashing:
-```typescript
-// Verify bcrypt is working
-const bcrypt = require('bcrypt');
-const hash = await bcrypt.hash('password', 10);
-const match = await bcrypt.compare('password', hash);
-console.log(match); // Should be true
-```
+2. **รีเซ็ตรหัสผ่าน:**
+   - ใช้ Prisma Studio (`npx prisma studio`) เข้าไปแก้รหัสผ่านใหม่
 
 ---
 
-### LINE Integration Issues
+### ปัญหา LINE Integration
 
-#### Webhook not receiving events
+#### Webhook ไม่ทำงาน (ไม่ได้รับข้อความ)
 
-**Symptoms:**
-- LINE messages not processed
-- No webhook events in logs
+**อาการ:**
+- ข้อความ LINE ไม่ถูกส่งเข้าระบบ
+- ไม่เห็น Logs การทำงาน
 
-**Solutions:**
+**วิธีแก้ไข:**
 
-1. Verify webhook URL in LINE Developers Console:
-```
-https://your-domain.com/api/line/webhook
-```
+1. **ตรวจสอบ Webhook URL ใน LINE Developers:**
+   - ต้องเป็น HTTPS
+   - ถ้าใช้ Railway: `https://your-backend.railway.app/api/line/webhook`
+   - อย่าลืมกด Verify
 
-2. Check ngrok (development):
-```bash
-ngrok http 3001
-# Use the HTTPS URL in LINE Console
-```
+2. **ตรวจสอบค่า Config ใน `.env`:**
+   - `LINE_CHANNEL_ID`
+   - `LINE_CHANNEL_SECRET`
+   - `LINE_ACCESS_TOKEN`
+   - ต้องตรงกับใน Console 100%
 
-3. Verify LINE credentials in `.env`:
-```env
-LINE_CHANNEL_ID="your-channel-id"
-LINE_CHANNEL_SECRET="your-channel-secret"
-LINE_ACCESS_TOKEN="your-access-token"
-```
+#### ส่งข้อความไม่ออก
 
-4. Test webhook manually:
-```bash
-curl -X POST https://your-domain.com/api/line/webhook \
-  -H "Content-Type: application/json" \
-  -d '{"events":[]}'
-```
-
-#### LINE messages not sending
-
-**Symptoms:**
-- Notifications not delivered
+**อาการ:**
+- แจ้งเตือนบิลไม่เด้ง
 - Error: `LINE API error`
 
-**Solutions:**
+**วิธีแก้ไข:**
 
-1. Check LINE access token validity
-
-2. Verify LINE user is linked:
-```sql
-SELECT * FROM line_users WHERE lineUserId = 'U1234567890abcdef';
-```
-
-3. Check LINE API quota limits
-
-4. Review LINE webhook logs:
-```bash
-docker-compose logs backend | grep LINE
-```
+1. **เช็ค Access Token:** อาจจะหมดอายุ ลองกด Reissue ใน Console และอัพเดทใน `.env`
+2. **เช็ค User ID:** ผู้เช่าคนนั้น Add LINE Official Account หรือยัง? (ต้องเป็นเพื่อนกันก่อนถึงจะส่งได้)
 
 ---
 
-### File Upload Issues
+### ปัญหา Frontend (Vercel)
 
-#### Upload fails
+#### หน้าเว็บขาว หรือโหลดไม่ขึ้น
 
-**Symptoms:**
-- Error: `File upload failed`
-- Files not appearing
+**อาการ:**
+- หน้าจอว่างเปล่า
+- มี Error สีแดงใน Console (F12)
 
-**Solutions:**
+**วิธีแก้ไข:**
 
-1. Check file size limits:
-```typescript
-// In middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-```
+1. **เช็ค API URL:**
+   - ตรวจสอบ `NEXT_PUBLIC_API_URL` ใน Vercel
+   - **ต้องมี `https://` นำหน้า** (เช่น `https://backend.railway.app`)
 
-2. Verify Supabase configuration:
-```env
-SUPABASE_URL="your-supabase-url"
-SUPABASE_ANON_KEY="your-anon-key"
-```
+2. **เช็ค CORS:**
+   - ใน Railway ต้องตั้ง `ALLOWED_ORIGINS` ให้ตรงกับ URL ของ Vercel (ไม่มี / ปิดท้าย)
 
-3. Check upload directory permissions:
-```bash
-chmod 755 backend/uploads
-```
-
-4. Test Supabase connection:
-```typescript
-const { data, error } = await supabase.storage.getBucket('uploads');
-console.log(data, error);
-```
+3. **ลอง Build ใหม่:** กด Redeploy ใน Vercel
 
 ---
 
-### Performance Issues
+### การขอความช่วยเหลือ
 
-#### Slow page load
+ถ้าแก้ไม่หาย ให้ลองทำตามนี้:
 
-**Symptoms:**
-- Pages take >3 seconds to load
-- High server CPU usage
+1. **ดู Logs:**
+   - Railway: ดูที่แท็บ Logs ของ Service Backend
+   - Vercel: ดูที่แท็บ Logs ของ Deployment ล่าสุด
 
-**Solutions:**
+2. **เช็คสถานะระบบ:**
+   - ลองเข้า `/api/health` ดูว่า Backend ยังตอบสนองไหม
 
-1. Enable Redis caching:
-```typescript
-// Cache frequently accessed data
-const cached = await redis.get('key');
-if (cached) return JSON.parse(cached);
-```
-
-2. Optimize database queries:
-```typescript
-// Add indexes
-@@index([email])
-@@index([createdAt])
-```
-
-3. Enable gzip compression (already in nginx.conf)
-
-4. Optimize images:
-```bash
-# Use WebP format
-# Lazy load images
-```
-
-#### High memory usage
-
-**Symptoms:**
-- Server running out of memory
-- Application crashes
-
-**Solutions:**
-
-1. Check memory usage:
-```bash
-docker stats
-```
-
-2. Increase memory limits in docker-compose:
-```yaml
-services:
-  backend:
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-```
-
-3. Optimize Prisma queries:
-```typescript
-// Use select to fetch only needed fields
-const users = await prisma.user.findMany({
-  select: { id: true, email: true }
-});
-```
-
----
-
-### Socket.io Issues
-
-#### Real-time chat not working
-
-**Symptoms:**
-- Messages not appearing in real-time
-- Socket connection fails
-
-**Solutions:**
-
-1. Check Socket.io connection:
-```javascript
-// In browser console
-socket.connected // Should be true
-```
-
-2. Verify CORS settings:
-```typescript
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CORS_ORIGIN,
-    credentials: true
-  }
-});
-```
-
-3. Check nginx WebSocket proxy:
-```nginx
-location /socket.io/ {
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-}
-```
-
----
-
-### Docker Issues
-
-#### Container fails to start
-
-**Symptoms:**
-- Error: `Container exited with code 1`
-- Services not running
-
-**Solutions:**
-
-1. Check logs:
-```bash
-docker-compose logs backend
-```
-
-2. Rebuild images:
-```bash
-docker-compose build --no-cache
-```
-
-3. Remove old containers:
-```bash
-docker-compose down -v
-docker-compose up -d
-```
-
-4. Check disk space:
-```bash
-df -h
-docker system prune -a
-```
-
----
-
-### Frontend Issues
-
-#### Page not loading
-
-**Symptoms:**
-- Blank page
-- Error in browser console
-
-**Solutions:**
-
-1. Check browser console for errors
-
-2. Verify API URL:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-```
-
-3. Clear Next.js cache:
-```bash
-rm -rf .next
-npm run build
-```
-
-4. Check network requests in DevTools
-
-#### Build fails
-
-**Symptoms:**
-- Error during `npm run build`
-- TypeScript errors
-
-**Solutions:**
-
-1. Clear node_modules:
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-2. Fix TypeScript errors:
-```bash
-npm run lint
-```
-
-3. Check Next.js version compatibility
-
----
-
-## Getting Help
-
-If you can't resolve the issue:
-
-1. Check the logs:
-```bash
-# Backend logs
-docker-compose logs backend
-
-# Frontend logs
-docker-compose logs frontend
-
-# All logs
-docker-compose logs
-```
-
-2. Enable debug mode:
-```env
-NODE_ENV=development
-DEBUG=*
-```
-
-3. Check health endpoints:
-```bash
-curl http://localhost:3001/api/health
-```
-
-4. Review recent changes:
-```bash
-git log --oneline -10
-```
-
-## Debug Checklist
-
-- [ ] Check all services are running
-- [ ] Verify environment variables
-- [ ] Review logs for errors
-- [ ] Test database connection
-- [ ] Test Redis connection
-- [ ] Check network connectivity
-- [ ] Verify file permissions
-- [ ] Check disk space
-- [ ] Review recent code changes
-- [ ] Test in incognito/private mode
+3. **ติดต่อผู้พัฒนา:**
+   - แจ้งปัญหาพร้อมแคปหน้าจอ Error Log มาด้วย
