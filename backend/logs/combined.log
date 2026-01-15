@@ -4231,3 +4231,15 @@
 {"level":"info","message":"Cron jobs initialized","service":"dormitory-api","timestamp":"2026-01-16 04:15:17"}
 {"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-16 04:15:17"}
 {"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-16 04:15:17"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","service":"dormitory-api","timestamp":"2026-01-16 04:17:29"}
+{"level":"info","message":"Socket.io initialized","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"Bull queues initialized","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"Cron jobs initialized","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"Socket.io initialized","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"Bull queues initialized","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"Cron jobs initialized","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"🚀 Server is running on port 3001","service":"dormitory-api","timestamp":"2026-01-16 04:17:30"}
+{"level":"info","message":"📝 Environment: development","service":"dormitory-api","timestamp":"2026-01-16 04:17:31"}

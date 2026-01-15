@@ -27,30 +27,40 @@ const redisConfig = process.env.REDIS_URL
  * 
  * สำหรับส่ง LINE notifications
  */
-export const notificationQueue = new Bull('notifications', process.env.REDIS_URL || {
-  redis: redisConfig as any,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 2000,
-    },
-    removeOnComplete: 100, // Keep last 100 completed jobs
-    removeOnFail: 500, // Keep last 500 failed jobs
-  },
-});
+export const notificationQueue = process.env.REDIS_URL
+  ? new Bull('notifications', process.env.REDIS_URL, {
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 2000 },
+      removeOnComplete: 100,
+      removeOnFail: 500,
+    }
+  })
+  : new Bull('notifications', {
+    redis: redisConfig as any,
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 2000 },
+      removeOnComplete: 100,
+      removeOnFail: 500,
+    }
+  });
 
 /**
  * Bill Generation Queue
  * 
  * สำหรับสร้างบิลรายเดือน
  */
-export const billGenerationQueue = new Bull('bill-generation', process.env.REDIS_URL || {
-  redis: redisConfig as any,
-  settings: {
-    maxStalledCount: 1,
-  },
-});
+export const billGenerationQueue = process.env.REDIS_URL
+  ? new Bull('bill-generation', process.env.REDIS_URL, {
+    settings: { maxStalledCount: 1 }
+  })
+  : new Bull('bill-generation', {
+    redis: redisConfig as any,
+    settings: {
+      maxStalledCount: 1,
+    },
+  });
 
 /**
  * Initialize Queues
